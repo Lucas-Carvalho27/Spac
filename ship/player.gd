@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
-const ShipParts = preload("res://ship_parts.gd")
-const ShipArt = preload("res://ship_art.gd")
+const ShipParts = preload("res://ship/ship_parts.gd")
+const ShipArt = preload("res://ship/ship_art.gd")
 
 @export var base_thrust := 13000.0 # força básica em todas as direções, mesmo sem motor
 @export var engine_power := 1.0 # multiplica a força de todos os motores (a força de cada um está em ship_parts.gd)

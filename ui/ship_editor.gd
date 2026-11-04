@@ -1,7 +1,7 @@
 extends Control
 
-const ShipParts = preload("res://ship_parts.gd")
-const ShipArt = preload("res://ship_art.gd")
+const ShipParts = preload("res://ship/ship_parts.gd")
+const ShipArt = preload("res://ship/ship_art.gd")
 
 const RADIUS := 10 # o grid vai de -10 a 10 (21x21 quadradinhos)
 const EDIT_CELL := 24.0 # tamanho do quadradinho no editor, em px

@@ -2,7 +2,7 @@
 # o casco é uma peça só (contorno só nas bordas de fora, cantos chanfrados, emendas entre placas)
 # e armas e motores ficam montados em cima dele.
 
-const ShipParts = preload("res://ship_parts.gd")
+const ShipParts = preload("res://ship/ship_parts.gd")
 
 const HULL := Color(0.42, 0.47, 0.55)
 const HULL_ALT := Color(0.47, 0.52, 0.6)

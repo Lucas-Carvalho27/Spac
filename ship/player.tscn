@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3]
 
-[ext_resource type="Script" path="res://player.gd" id="1_player"]
-[ext_resource type="PackedScene" path="res://bullet.tscn" id="2_bullet"]
+[ext_resource type="Script" path="res://ship/player.gd" id="1_player"]
+[ext_resource type="PackedScene" path="res://ship/bullet.tscn" id="2_bullet"]
 
 [node name="Player" type="CharacterBody2D" groups=["player"]]
 motion_mode = 1

@@ -3,7 +3,7 @@ extends PanelContainer
 # Painel para testar: cada barra mexe numa variável da Player na hora, com o jogo rodando.
 # O que for mudado fica salvo em user://ajustes.json; "Restaurar padrão" volta aos valores do Inspector.
 
-const ShipParts = preload("res://ship_parts.gd")
+const ShipParts = preload("res://ship/ship_parts.gd")
 
 const SAVE_PATH := "user://ajustes.json"
 
