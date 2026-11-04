@@ -1,0 +1,107 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="PackedScene" path="res://player.tscn" id="1_player"]
+[ext_resource type="PackedScene" path="res://meteor.tscn" id="2_meteor"]
+[ext_resource type="Script" path="res://ship_editor.gd" id="3_editor"]
+[ext_resource type="Script" path="res://tuning_panel.gd" id="4_tuning"]
+[ext_resource type="Script" path="res://star_layer.gd" id="5_stars"]
+[ext_resource type="Script" path="res://meteor_field.gd" id="6_field"]
+[ext_resource type="Script" path="res://nebula_layer.gd" id="7_nebula"]
+
+[node name="Main" type="Node2D"]
+
+[node name="Background" type="Node2D" parent="."]
+
+[node name="Nebulas" type="Parallax2D" parent="Background"]
+scroll_scale = Vector2(0.02, 0.02)
+repeat_size = Vector2(2048, 2048)
+
+[node name="Layer" type="Node2D" parent="Background/Nebulas"]
+script = ExtResource("7_nebula")
+
+[node name="FarStars" type="Parallax2D" parent="Background"]
+scroll_scale = Vector2(0.04, 0.04)
+repeat_size = Vector2(1024, 1024)
+
+[node name="Layer" type="Node2D" parent="Background/FarStars"]
+script = ExtResource("5_stars")
+
+[node name="MidStars" type="Parallax2D" parent="Background"]
+scroll_scale = Vector2(0.12, 0.12)
+repeat_size = Vector2(1024, 1024)
+
+[node name="Layer" type="Node2D" parent="Background/MidStars"]
+script = ExtResource("5_stars")
+count = 88
+min_size = 0.7
+max_size = 1.5
+min_brightness = 0.4
+max_brightness = 0.75
+sky_seed = 2
+
+[node name="NearStars" type="Parallax2D" parent="Background"]
+scroll_scale = Vector2(0.3, 0.3)
+repeat_size = Vector2(1024, 1024)
+
+[node name="Layer" type="Node2D" parent="Background/NearStars"]
+script = ExtResource("5_stars")
+count = 40
+min_size = 1.0
+max_size = 2.2
+min_brightness = 0.6
+max_brightness = 1.0
+sky_seed = 3
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+position = Vector2(576, 324)
+
+[node name="Meteors" type="Node2D" parent="."]
+script = ExtResource("6_field")
+meteor_scene = ExtResource("2_meteor")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="EditButton" type="Button" parent="HUD"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 186.0
+offset_bottom = 50.0
+focus_mode = 0
+text = "Editar nave (Tab)"
+
+[node name="TuningButton" type="Button" parent="HUD"]
+offset_left = 196.0
+offset_top = 16.0
+offset_right = 316.0
+offset_bottom = 50.0
+focus_mode = 0
+text = "Ajustes (F1)"
+
+[node name="Tuning" type="PanelContainer" parent="HUD"]
+visible = false
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -316.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 56.0
+grow_horizontal = 0
+script = ExtResource("4_tuning")
+
+[node name="EditorLayer" type="CanvasLayer" parent="."]
+process_mode = 3
+layer = 10
+
+[node name="ShipEditor" type="Control" parent="EditorLayer"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("3_editor")
+
+[connection signal="pressed" from="HUD/EditButton" to="EditorLayer/ShipEditor" method="open"]
+[connection signal="pressed" from="HUD/TuningButton" to="HUD/Tuning" method="toggle"]
