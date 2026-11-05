@@ -1,9 +1,10 @@
-# Regras das peças da nave: tamanhos, peso, força, centro de massa e salvamento (o desenho fica em ship_art.gd).
+# Regras das peças do chassi da nave: tamanhos, peso, força e centro de massa
+# (o desenho fica em ship_art.gd, o interior em ship_interior.gd e o salvamento em ship_save.gd).
 # A nave é uma lista de peças: {"type": nome em PARTS, "cell": Vector2i, "dir": 0..3}
 # "dir" é para onde a peça aponta na nave: 0 = frente, 1 = direita, 2 = trás, 3 = esquerda.
 # A arma atira para "dir"; o motor empurra para "dir" (o fogo sai do lado oposto).
 # Peça quadrada ocupa um quadrado a partir de "cell" (canto de cima-esquerda);
-# peça comprida (a arma) tem a base em "cell" e se estende para onde aponta.
+# peça comprida (arma, chão 1x2) tem a base em "cell" e se estende para onde aponta.
 
 const CELL := 10.0 # tamanho de um quadradinho na nave, em px
 
@@ -14,6 +15,9 @@ const ENGINE := "engine"
 # size = comprimento (na direção para onde a peça aponta) x largura, em quadradinhos
 const PARTS := {
 	"floor": {"kind": FLOOR, "name": "Chão", "size": Vector2i(1, 1), "mass": 1.0},
+	"floor_1x2": {"kind": FLOOR, "name": "Chão", "size": Vector2i(2, 1), "mass": 2.0},
+	"floor_3x3": {"kind": FLOOR, "name": "Chão", "size": Vector2i(3, 3), "mass": 9.0},
+	"floor_4x4": {"kind": FLOOR, "name": "Chão", "size": Vector2i(4, 4), "mass": 16.0},
 	"weapon": {"kind": WEAPON, "name": "Arma", "size": Vector2i(2, 1), "mass": 3.0},
 	"engine_small": {"kind": ENGINE, "name": "Motor pequeno", "size": Vector2i(1, 1), "mass": 2.0, "thrust": 5000.0},
 	"engine_medium": {"kind": ENGINE, "name": "Motor médio", "size": Vector2i(2, 2), "mass": 6.0, "thrust": 14000.0},
@@ -32,8 +36,6 @@ const MIN_LEVER := 0.5
 const TURN_AIM_GAIN := 6.0
 const TURN_RESPONSE := 20.0
 const TURN_BRAKE_MARGIN := 0.7
-
-const SAVE_PATH := "user://nave_v2.json" # v2: peças de tamanhos diferentes
 
 static func dir_vector(dir: int) -> Vector2:
 	return Vector2.RIGHT.rotated(dir * PI / 2.0)
@@ -94,10 +96,19 @@ static func occupancy(design: Array) -> Dictionary:
 # e dois motores pequenos no bico, de lado, para ajudar a girar
 static func default_design() -> Array:
 	var design := []
-	var half_width := {-2: 3, -1: 3, 0: 2, 1: 2, 2: 1, 3: 1, 4: 0}
-	for x in half_width:
-		for y in range(-half_width[x], half_width[x] + 1):
+	# Chão com placas de tamanhos variados: em pé nas asas de trás, deitadas no corpo e no bico
+	for y in [-3, 2]:
+		for x in [-2, -1]:
+			design.append({"type": "floor_1x2", "cell": Vector2i(x, y), "dir": 1})
+	for y in range(-1, 2):
+		design.append({"type": "floor_1x2", "cell": Vector2i(-2, y), "dir": 0})
+		design.append({"type": "floor_1x2", "cell": Vector2i(2, y), "dir": 0})
+	for y in [-2, 2]:
+		design.append({"type": "floor_1x2", "cell": Vector2i(0, y), "dir": 0})
+	for x in [0, 1]:
+		for y in range(-1, 2):
 			design.append({"type": "floor", "cell": Vector2i(x, y), "dir": 0})
+	design.append({"type": "floor", "cell": Vector2i(4, 0), "dir": 0})
 	design.append({"type": "engine_large", "cell": Vector2i(-5, -1), "dir": 0})
 	design.append({"type": "weapon", "cell": Vector2i(2, -2), "dir": 0})
 	design.append({"type": "weapon", "cell": Vector2i(2, 2), "dir": 0})
@@ -208,18 +219,14 @@ static func half_turn_time(design: Array, power: float, gyro_torque: float, max_
 		time += dt
 	return time
 
-static func save_design(design: Array) -> void:
+static func to_json(design: Array) -> Array:
 	var parts := []
 	for part in design:
 		parts.append({"type": part.type, "x": part.cell.x, "y": part.cell.y, "dir": part.dir})
-	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
-	if file:
-		file.store_string(JSON.stringify(parts))
+	return parts
 
-static func load_design() -> Array:
-	if not FileAccess.file_exists(SAVE_PATH):
-		return default_design()
-	var parts = JSON.parse_string(FileAccess.get_file_as_string(SAVE_PATH))
+# A nave salva, ou a nave padrão se não der para usar o que estava salvo
+static func from_json(parts) -> Array:
 	if not (parts is Array):
 		return default_design()
 	var design := []

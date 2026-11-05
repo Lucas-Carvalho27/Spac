@@ -2,6 +2,8 @@ extends CharacterBody2D
 
 const ShipParts = preload("res://ship/ship_parts.gd")
 const ShipArt = preload("res://ship/ship_art.gd")
+const ShipInterior = preload("res://ship/ship_interior.gd")
+const ShipSave = preload("res://ship/ship_save.gd")
 
 @export var base_thrust := 13000.0 # força básica em todas as direções, mesmo sem motor
 @export var engine_power := 1.0 # multiplica a força de todos os motores (a força de cada um está em ship_parts.gd)
@@ -17,8 +19,10 @@ const ShipArt = preload("res://ship/ship_art.gd")
 @export var bullet_scene: PackedScene
 @export var fire_rate := 8.0 # tiros por segundo segurando o botão
 
-# A nave montada no editor: lista de peças (ver ship_parts.gd)
+# A nave montada no editor: lista de peças (ver ship_parts.gd) e o interior (ver ship_interior.gd;
+# por enquanto paredes e componentes internos ainda não mudam nada no jogo)
 var design := []
+var interior := {}
 var mass := 1.0
 var inertia := 1.0
 var center := Vector2.ZERO # centro de massa, em quadradinhos; a nave gira em volta dele
@@ -50,11 +54,14 @@ func _ready() -> void:
 	effects_layer.draw.connect(_draw_effects_layer)
 	add_child(hull_layer)
 	add_child(effects_layer)
-	apply_design(ShipParts.load_design())
+	var ship := ShipSave.load_ship()
+	apply_design(ship.parts, ship.interior)
 
-# Monta a nave (peso, giro e colisão) a partir do desenho do editor
-func apply_design(new_design: Array) -> void:
+# Monta a nave (peso, giro e colisão) a partir do desenho do editor. Sem interior novo,
+# mantém o atual (tirando o que não cabe mais no chassi novo).
+func apply_design(new_design: Array, new_interior = null) -> void:
 	design = new_design
+	interior = ShipInterior.cleaned(design, interior if new_interior == null else new_interior)
 	mass = ShipParts.total_mass(design)
 	center = ShipParts.center_of_mass(design)
 	inertia = ShipParts.inertia(design, center) * ShipParts.CELL * ShipParts.CELL
